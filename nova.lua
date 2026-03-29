@@ -1,35 +1,61 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local LP = game:GetService("Players").LocalPlayer
-local RS = game:GetService("ReplicatedStorage")
 
--- APRENDE ESTO: Esta función busca la carpeta de eventos aunque cambie de nombre
-local function EncontrarEvento()
-    for _, v in pairs(RS:GetDescendants()) do
-        if v:IsA("RemoteEvent") and v.Name:find("Hit") then
-            return v -- Encontramos el "cable" correcto
+-- [[ EL RADAR: Busca el evento de golpe sin importar el nombre ]]
+local function BuscarEvento()
+    for _, v in pairs(game:GetDescendants()) do
+        -- Buscamos un evento que mencione "Hit" o "Damage"
+        if v:IsA("RemoteEvent") and (v.Name:find("Hit") or v.Name:find("Damage")) then
+            return v
         end
     end
 end
 
-local EventoDaño = EncontrarEvento()
+local RemoteGolpe = BuscarEvento()
 
--- Bucle de Farm (Simplificado para que aprendas la lógica)
+-- [[ INTERFAZ ESTILO FOXNAME ]]
+local Window = Fluent:CreateWindow({
+    Title = "Foxname - 99 NIGHTS",
+    SubTitle = "v28.0 (Radar Fixed)",
+    TabWidth = 160, Size = UDim2.fromOffset(580, 460), Acrylic = false, Theme = "Dark"
+})
+
+local Tabs = {
+    Combat = Window:AddTab({ Title = "Combat", Icon = "zap" }),
+    Tree = Window:AddTab({ Title = "Tree", Icon = "tree" }),
+    Bring = Window:AddTab({ Title = "Bring", Icon = "box" })
+}
+
+local Options = Fluent.Options
+
+-- [[ LAS OPCIONES ]]
+Tabs.Combat:AddToggle("KillAura", {Title = "Kill Aura", Default = false})
+Tabs.Tree:AddToggle("TreeAura", {Title = "Tree Aura", Default = false})
+Tabs.Bring:AddToggle("BringMode", {Title = "Bring Mode", Default = false})
+
+-- [[ EL CEREBRO DEL SCRIPT ]]
 task.spawn(function()
-    while task.wait(0.5) do
-        if EventoDaño then
-            pcall(function()
+    while task.wait(0.3) do
+        pcall(function()
+            local hrp = LP.Character.HumanoidRootPart
+            local tool = LP.Character:FindFirstChildOfClass("Tool")
+            
+            -- Si el radar encontró el evento, lo usamos
+            if RemoteGolpe then
                 for _, obj in pairs(game.Workspace:GetChildren()) do
-                    -- Filtramos: Si es un árbol y está cerca
-                    if obj.Name:lower():find("tree") then
-                        local dist = (LP.Character.HumanoidRootPart.Position - obj.Position).Magnitude
-                        if dist < 30 then
-                            -- MANDAMOS EL GOLPE
-                            EventoDaño:FireServer("FireAllClients", obj.Name, "Old Axe")
+                    -- TREE AURA
+                    if Options.TreeAura.Value and obj.Name:lower():find("tree") then
+                        if (hrp.Position - obj.Position).Magnitude < 40 then
+                            RemoteGolpe:FireServer("FireAllClients", obj.Name, (tool and tool.Name or "Old Axe"))
                         end
                     end
+                    
+                    -- BRING MODE (NIÑOS Y COFRES)
+                    if Options.BringMode.Value and (obj.Name:lower():find("child") or obj.Name:lower():find("chest")) then
+                        obj.CFrame = hrp.CFrame
+                    end
                 end
-            end)
-        else
-            warn("¡No se encontró el evento de daño! El juego cambió de nuevo.")
-        end
+            end
+        end)
     end
 end)
