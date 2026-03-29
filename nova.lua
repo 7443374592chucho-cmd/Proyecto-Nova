@@ -1,90 +1,52 @@
--- [[ PROJECT NOVA: 99 NIGHTS ULTIMATE EDITION ]]
+-- [[ PROJECT NOVA: 99 NIGHTS ELITE - AUTO-SYNC ]]
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local LP = game.Players.LocalPlayer
 
 local Window = Fluent:CreateWindow({
     Title = "PROJECT NOVA | 99 NIGHTS",
-    SubTitle = "by @7443374592chucho-cmd",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.RightControl
+    SubTitle = "v5.0 - Hit Sync Edition",
+    TabWidth = 160, Size = UDim2.fromOffset(580, 460), Acrylic = true, Theme = "Dark"
 })
 
-local Tabs = {
-    Main = Window:AddTab({ Title = "Supervivencia", Icon = "shield" }),
-    Combat = Window:AddTab({ Title = "Combate Fast", Icon = "zap" }),
-    Settings = Window:AddTab({ Title = "Configuración", Icon = "settings" })
-}
-
+local Tabs = { Main = Window:AddTab({ Title = "Farm", Icon = "pickaxe" }) }
 local Options = Fluent.Options
 
--- [[ FUNCIÓN ÚNICA: AUTO-REPARAR BASE ]]
--- Esta función busca estructuras dañadas y las repara al instante
-Tabs.Main:AddToggle("AutoRepair", {Title = "Auto-Reparar Estructuras", Default = false})
+-- [[ AUTO-FARM INTELIGENTE ]]
+Tabs.Main:AddToggle("AutoFarm", {Title = "Auto-Farm (Sync con Servidor)", Default = false})
 
 task.spawn(function()
-    while task.wait(0.5) do -- Revisión cada medio segundo para no dar lag
-        if Options.AutoRepair.Value then
+    while task.wait(0.25) do -- Velocidad segura para no ser kickeado
+        if Options.AutoFarm.Value then
             pcall(function()
-                -- Buscamos en el Workspace las construcciones del jugador
-                for _, obj in pairs(game.Workspace.Buildings:GetChildren()) do 
-                    if obj:FindFirstChild("Health") and obj.Health.Value < obj.MaxHealth.Value then
-                        -- Disparamos el remoto de reparación (ajustar según el juego)
-                        game:GetService("ReplicatedStorage").Remotes.Repair:FireServer(obj)
+                local char = LP.Character
+                local tool = char:FindFirstChildOfClass("Tool")
+                
+                if tool then
+                    -- Buscamos el árbol o piedra más cercana (Radio de 18 studs)
+                    for _, obj in pairs(game.Workspace:GetChildren()) do
+                        if (obj.Name:find("Tree") or obj.Name:find("Rock")) and (char.HumanoidRootPart.Position - obj.Position).Magnitude < 18 then
+                            
+                            -- EL EVENTO REAL (Basado en tu captura)
+                            game:GetService("ReplicatedStorage").Events.PlayEnemyHitSound:FireServer(
+                                "FireAllClients", -- Arg 1
+                                obj.Name,         -- Arg 2: Nombre del árbol/roca
+                                tool.Name         -- Arg 3: Tu herramienta (Hacha/Pico)
+                            )
+                            
+                        end
                     end
+                else
+                    Fluent:Notify({Title = "Aviso", Content = "Equipa una herramienta primero.", Duration = 2})
                 end
             end)
         end
     end
 end)
 
--- [[ FUNCIÓN: FAST GATHER (RECOLECCIÓN RÁPIDA) ]]
-Tabs.Main:AddToggle("FastGather", {Title = "Recolección Instantánea", Default = false})
-
-task.spawn(function()
-    while task.wait() do
-        if Options.FastGather.Value then
-            pcall(function()
-                -- Detecta recursos en un radio cercano y los recolecta
-                local char = game.Players.LocalPlayer.Character
-                for _, res in pairs(game.Workspace.Resources:GetChildren()) do
-                    if (char.HumanoidRootPart.Position - res.Position).Magnitude < 15 then
-                        game:GetService("ReplicatedStorage").Remotes.Collect:FireServer(res)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- [[ COMBATE: KILL AURA OPTIMIZADO ]]
-Tabs.Combat:AddToggle("KillAura", {Title = "Kill Aura (Noches Seguras)", Default = false})
-Tabs.Combat:AddSlider("AuraRange", {Title = "Rango de Ataque", Default = 20, Min = 10, Max = 100, Rounding = 1})
-
-game:GetService("RunService").Heartbeat:Connect(function()
-    if Options.KillAura.Value then
-        pcall(function()
-            local lp = game.Players.LocalPlayer
-            for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
-                if mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                    local dist = (lp.Character.HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude
-                    if dist <= Options.AuraRange.Value then
-                        -- Ataque rápido sin cooldown (Fast Attack)
-                        game:GetService("ReplicatedStorage").Remotes.Attack:FireServer(mob)
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- Notificación de inicio profesional
-Fluent:Notify({
-    Title = "Proyecto Nova Cargado",
-    Content = "Funciones para 99 Noches activas.",
-    Duration = 5
+-- [[ SPEED HACK MEJORADO ]]
+Tabs.Main:AddSlider("WalkSpeed", {
+    Title = "Velocidad", Default = 16, Min = 16, Max = 100, Rounding = 1,
+    Callback = function(v) LP.Character.Humanoid.WalkSpeed = v end
 })
 
-Window:SelectTab(1)
+Fluent:Notify({Title = "Nova Sincronizado", Content = "Evento detectado: PlayEnemyHitSound", Duration = 5})
