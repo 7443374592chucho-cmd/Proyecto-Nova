@@ -1,78 +1,59 @@
--- [[ PROYECTO NOVA: Edición Profesional optimized ]] --
--- 1. Crear el contenedor principal
-local NovaUI = Instance.new("ScreenGui")
-NovaUI.Name = "NovaHub"
-if gethui then
-    NovaUI.Parent = gethui()
-else
-    NovaUI.Parent = game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-end
+-- [[ SEGURIDAD Y OPTIMIZACIÓN ]]
+if not game:IsLoaded() then game.Loaded:Wait() end
 
--- 2. Variables de Seguridad
-local Player = game.Players.LocalPlayer
-local Char = Player.Character or Player.CharacterAdded:Wait()
-local Hum = Char:WaitForChild("Humanoid")
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 
--- 3. Función de Velocidad "TweenService" (Suave y Seguro)
-local function SmoothSpeed(target)
-    local TweenService = game:GetService("TweenService")
-    local info = TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-    TweenService:Create(Hum, info, {WalkSpeed = target}):Play()
-end
+-- Interfaz Única
+local Window = Fluent:CreateWindow({
+    Title = "PROJECT NOVA",
+    SubTitle = "v2.0 | High-Performance",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(550, 400),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+})
 
--- 4. Diseño del Menú (Estilo Neón Moderno)
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 220, 0, 120) -- Un poco más alto
-Main.Position = UDim2.new(0.5, -110, 0.5, -60) -- Centrado perfecto
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Gris oscuro (Base neón)
-Main.BorderSizePixel = 2
-Main.BorderColor3 = Color3.fromRGB(0, 255, 255) -- Bordes Cian Neón (Esto lo hace brillar)
-Main.Parent = NovaUI
-Main.ZIndex = 10 -- Lo pone por encima de todo
+local Tabs = {
+    Combat = Window:AddTab({ Title = "Combat/Fast", Icon = "zap" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
 
--- 5. Efecto de Esquinas Redondeadas
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim2.new(0, 12)
-Corner.Parent = Main
+-- [[ LÓGICA DE FUNCIÓN "FAST" ]]
+local FastConfig = { Active = false, Speed = 0.1 }
 
--- 6. Botón de Velocidad
-local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(0, 180, 0, 40)
-Button.Position = UDim2.new(0.5, -90, 0.5, -20)
-Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Button.Text = "ACTIVAR VELOCIDAD 100"
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.Font = Enum.Font.GothamBold
-Button.TextSize = 14
-Button.Parent = Main
-Button.ZIndex = 11
-
--- 7. Efecto de Esquinas en el Botón
-local ButtonCorner = Instance.new("UICorner")
-ButtonCorner.CornerRadius = UDim2.new(0, 8)
-ButtonCorner.Parent = Button
-
--- 8. Evento del Botón
-local toggled = false
-Button.MouseButton1Click:Connect(function()
-    if not toggled then
-        SmoothSpeed(100) -- Velocidad para bypass
-        Button.Text = "VELOCIDAD: [ON]"
-        Button.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde neón
-    else
-        SmoothSpeed(16) -- Velocidad normal
-        Button.Text = "VELOCIDAD: [OFF]"
-        Button.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo neón
+Tabs.Combat:AddToggle("FastAttack", {
+    Title = "Ultra Fast Mode", 
+    Default = false,
+    Callback = function(Value)
+        FastConfig.Active = Value
     end
-    toggled = not toggled
+})
+
+-- Bucle de alta velocidad optimizado (Dificil de parchar)
+-- Usamos task.spawn para que no interfiera con otros procesos
+task.spawn(function()
+    while task.wait() do
+        if FastConfig.Active then
+            -- Aquí colocas el RemoteEvent que quieras "spammiar"
+            -- Ejemplo genérico para juegos de pelea/clicker:
+            pcall(function()
+                local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                if tool then
+                    tool:Activate() -- Activa la herramienta a velocidad máxima
+                end
+            end)
+        end
+    end
 end)
 
--- 9. Notificación de Carga
-pcall(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "PROYECTO NOVA V1",
-        Text = "Script cargado con éxito",
-        Icon = "rbxassetid://123456789", -- Icono por defecto (opcional)
-        Duration = 5
-    })
-end)
+-- Botón de destrucción segura (Limpia el script del juego)
+Tabs.Settings:AddButton({
+    Title = "Unload Script",
+    Callback = function()
+        Window:Destroy()
+    end
+})
+
+Fluent:Notify({Title = "Nova Loaded", Content = "Presiona RightControl para ocultar.", Duration = 5})
