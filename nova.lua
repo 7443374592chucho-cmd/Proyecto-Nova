@@ -1,61 +1,90 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local LP = game:GetService("Players").LocalPlayer
+Local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
--- [[ EL RADAR: Busca el evento de golpe sin importar el nombre ]]
-local function BuscarEvento()
-    for _, v in pairs(game:GetDescendants()) do
-        -- Buscamos un evento que mencione "Hit" o "Damage"
-        if v:IsA("RemoteEvent") and (v.Name:find("Hit") or v.Name:find("Damage")) then
-            return v
-        end
-    end
-end
+-- Crear GUI Única
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AntiFlingMaster"
 
-local RemoteGolpe = BuscarEvento()
+-- Marco del Menú (Para arrastrar)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 200, 0, 160)
+MainFrame.Position = UDim2.new(0, 20, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- [[ INTERFAZ ESTILO FOXNAME ]]
-local Window = Fluent:CreateWindow({
-    Title = "Foxname - 99 NIGHTS",
-    SubTitle = "v28.0 (Radar Fixed)",
-    TabWidth = 160, Size = UDim2.fromOffset(580, 460), Acrylic = false, Theme = "Dark"
-})
+-- TU CÓDIGO ORIGINAL (SIN MODIFICACIONES)
+local Button = Instance.new("TextButton", MainFrame)
+Button.Size = UDim2.new(0, 180, 0, 50)
+Button.Position = UDim2.new(0, 10, 0, 10)
+Button.Text = "Anti-Fling MASTER: OFF"
+Button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 
-local Tabs = {
-    Combat = Window:AddTab({ Title = "Combat", Icon = "zap" }),
-    Tree = Window:AddTab({ Title = "Tree", Icon = "tree" }),
-    Bring = Window:AddTab({ Title = "Bring", Icon = "box" })
-}
+local active = false
 
-local Options = Fluent.Options
+Button.MouseButton1Click:Connect(function()
+    active = not active
+    Button.Text = active and "Anti-Fling MASTER: ON" or "Anti-Fling MASTER: OFF"
+    Button.BackgroundColor3 = active and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+end)
 
--- [[ LAS OPCIONES ]]
-Tabs.Combat:AddToggle("KillAura", {Title = "Kill Aura", Default = false})
-Tabs.Tree:AddToggle("TreeAura", {Title = "Tree Aura", Default = false})
-Tabs.Bring:AddToggle("BringMode", {Title = "Bring Mode", Default = false})
+-- PESTAÑA DE ATAQUE (NUEVA)
+local FlingBtn = Instance.new("TextButton", MainFrame)
+FlingBtn.Size = UDim2.new(0, 180, 0, 50)
+FlingBtn.Position = UDim2.new(0, 10, 0, 70)
+FlingBtn.Text = "Fling Player: OFF"
+FlingBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
 
--- [[ EL CEREBRO DEL SCRIPT ]]
-task.spawn(function()
-    while task.wait(0.3) do
-        pcall(function()
-            local hrp = LP.Character.HumanoidRootPart
-            local tool = LP.Character:FindFirstChildOfClass("Tool")
+local flingActive = false
+FlingBtn.MouseButton1Click:Connect(function()
+    flingActive = not flingActive
+    FlingBtn.Text = flingActive and "Fling Player: ON" or "Fling Player: OFF"
+end)
+
+-- BUCLE ÚNICO
+RunService.Heartbeat:Connect(function()
+    -- 1. TU CÓDIGO ORIGINAL (Ejecutándose tal cual)
+    if active and LocalPlayer.Character then
+        local HRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if HRP then
+            -- 1. Eliminar cualquier fuerza extraña (BodyMovers)
+            for _, obj in pairs(LocalPlayer.Character:GetDescendants()) do
+                if obj:IsA("BodyVelocity") or obj:IsA("BodyForce") or obj:IsA("AlignPosition") or obj:IsA("LinearVelocity") then
+                    obj:Destroy()
+                end
+            end
             
-            -- Si el radar encontró el evento, lo usamos
-            if RemoteGolpe then
-                for _, obj in pairs(game.Workspace:GetChildren()) do
-                    -- TREE AURA
-                    if Options.TreeAura.Value and obj.Name:lower():find("tree") then
-                        if (hrp.Position - obj.Position).Magnitude < 40 then
-                            RemoteGolpe:FireServer("FireAllClients", obj.Name, (tool and tool.Name or "Old Axe"))
+            -- 2. Desactivar colisiones con otros jugadores
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
                         end
-                    end
-                    
-                    -- BRING MODE (NIÑOS Y COFRES)
-                    if Options.BringMode.Value and (obj.Name:lower():find("child") or obj.Name:lower():find("chest")) then
-                        obj.CFrame = hrp.CFrame
                     end
                 end
             end
-        end)
+        end
     end
-end)
+
+        -- 2. LÓGICA DE ATAQUE CORREGIDA Y POTENCIADA
+    if flingActive and LocalPlayer.Character then
+        local mouse = LocalPlayer:GetMouse()
+        local target = mouse.Target
+        
+        -- Verificamos si apuntamos a algo que sea parte de un personaje
+        if target and target.Parent then
+            local character = target.Parent
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            
+            -- Si encontramos al jugador, le damos un empujón masivo
+            if hrp then
+                -- Usamos AssemblyLinearVelocity (más efectivo que .Velocity)
+                hrp.AssemblyLinearVelocity = Vector3.new(0, 1000, 0)
+                
+                -- Opcional: Si el jugador tiene "Anchored", esto lo romperá
+                hrp.Anchored = false
+            end
+        end
+    end
