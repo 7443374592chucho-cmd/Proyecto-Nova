@@ -312,7 +312,7 @@ end
 local function Notify(title, text, iconId)
 	if not Settings.notifications then return end
 	pcall(function()
-		local screenGui = playerGui:FindFirstChild("VexroEmotes") or game:GetService("CoreGui"):FindFirstChild("VexroEmotes")
+		local screenGui = playerGui:FindFirstChild("AlexxEmotes") or game:GetService("CoreGui"):FindFirstChild("AlexxEmotes")
 		if not screenGui then
 			game:GetService("StarterGui"):SetCore("SendNotification", {Title = title, Text = text, Duration = 3})
 			return
