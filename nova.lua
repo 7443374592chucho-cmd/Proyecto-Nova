@@ -859,7 +859,7 @@ avatarHolder.Parent = splashBox
 local avatar = Instance.new("ImageLabel")
 avatar.Size = UDim2.new(0, 44, 0, 44)
 avatar.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=3164346931&width=150&height=150&format=png"
+avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=9401892843&width=150&height=150&format=png"
 avatar.ZIndex = 10003
 avatar.Parent = avatarHolder
 Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
@@ -2475,7 +2475,7 @@ ShowFriendRequestPanel = function(senderUserId, senderName)
 	local av = Instance.new("ImageLabel")
 	av.Size = UDim2.new(0,48,0,48); av.Position = UDim2.new(0,14,0,34)
 	av.BackgroundTransparency = 1
-	av.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(senderUserId) .. "&w=150&h=150"
+av.Image = "rbxthumb://type=AvatarHeadShot&id=9401892843&w=150&h=150"
 	av.ZIndex = 98002; av.Parent = panel
 	Instance.new("UICorner", av).CornerRadius = UDim.new(1,0)
 
@@ -2936,7 +2936,7 @@ RefreshFriendList = function()
 		local av = Instance.new("ImageLabel")
 		av.Size = UDim2.new(0,36,0,36); av.Position = UDim2.new(0,8,0.5,-18)
 		av.BackgroundTransparency = 1
-		av.Image = uid and ("rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=150&h=150") or ""
+		av.Image = "rbxthumb://type=AvatarHeadShot&id=9401892843&w=150&h=150"
 		av.ZIndex = 7; av.Parent = row
 		Instance.new("UICorner", av).CornerRadius = UDim.new(1,0)
 
