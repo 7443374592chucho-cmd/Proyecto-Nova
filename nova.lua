@@ -1,102 +1,74 @@
--- ==================================================
--- SCRIPT: KRYNEX FARMER (ELIMINACIÓN UNIVERSAL)
--- ==================================================
-
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Window = Rayfield:CreateWindow({Name = "Krynex - Farmer Final", Theme = "Default"})
-local MovementTab = Window:CreateTab("Main", nil)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-_G.SpeedValue = 100 
+local Window = Rayfield:CreateWindow({
+   Name = "Tu Script de Vuelo",
+   LoadingTitle = "Cargando...",
+   LoadingSubtitle = "por Gemini",
+   Theme = "Default",
+})
 
--- 1. Auto-Farm (La lógica que ya te funcionaba)
+local MovementTab = Window:CreateTab("Movimiento", nil) -- 'nil' es para el icono
+
+-- Toggle para 30 Metros
 MovementTab:CreateToggle({
-   Name = "Auto-Farm (Avanzar)",
+   Name = "Vuelo 30 Metros",
    CurrentValue = false,
    Callback = function(Value)
-      _G.AutoFarm = Value
-      while _G.AutoFarm do
-         local char = LocalPlayer.Character
-         if char and char:FindFirstChild("Humanoid") then
-            char.Humanoid:MoveTo(Vector3.new(0, 0, 100000)) 
-         end
-         task.wait(0.5)
-      end
+      _G.FlyMode30 = Value
+      if Value then _G.FlyMode90 = false end -- Apaga el otro
    end,
 })
 
--- Variable para la altura (predeterminada en 5)
-_G.FlyHeight = 5
-
-MovementTab:CreateSlider({
-   Name = "Altura de Vuelo",
-   Range = {24, 90},
-   Increment = 1,
-   Suffix = "m",
-   CurrentValue = 5,
-   Callback = function(Value)
-      _G.FlyHeight = Value
-   end,
-})
-
+-- Toggle para 90 Metros
 MovementTab:CreateToggle({
-   Name = "Activar Vuelo",
+   Name = "Vuelo 90 Metros",
    CurrentValue = false,
    Callback = function(Value)
-      _G.FlyMode = Value
+      _G.FlyMode90 = Value
+      if Value then _G.FlyMode30 = false end -- Apaga el otro
    end,
 })
 
-
--- 3. Velocidad Persistente
+-- Slider de Velocidad (WalkSpeed)
 MovementTab:CreateSlider({
-   Name = "Velocidad de Movimiento",
-   Range = {16, 1000},
-   Increment = 10,
-   CurrentValue = 100,
+   Name = "Velocidad",
+   Range = {16, 300},
+   Increment = 5,
+   Suffix = "spd",
+   CurrentValue = 16,
    Callback = function(Value)
-      _G.SpeedValue = Value
+      _G.WalkSpeedValue = Value
    end,
 })
 
-game:GetService("RunService").Heartbeat:Connect(function()
+local RunService = game:GetService("RunService")
+local LocalPlayer = game.Players.LocalPlayer
+
+RunService.Heartbeat:Connect(function()
     local char = LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if char.Humanoid.WalkSpeed ~= _G.SpeedValue then
-            char.Humanoid.WalkSpeed = _G.SpeedValue
-        end
-    end
-end)
-
-game:GetService("RunService").Heartbeat:Connect(function()
-    local player = game.Players.LocalPlayer
-    local char = player.Character
     if not char then return end
     local root = char:FindFirstChild("HumanoidRootPart")
-    
-    if _G.FlyMode and root then
-        -- Creamos o buscamos el BodyVelocity
+    if not root then return end
+
+    -- Lógica para 30m
+    if _G.FlyMode30 then
         local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
         bv.Name = "FlyBV"
-        bv.MaxForce = Vector3.new(0, 50000, 0)
+        bv.MaxForce = Vector3.new(0, 100000, 0)
+        bv.Velocity = (root.Position.Y < 30) and Vector3.new(0, 20, 0) or Vector3.new(0, 0, 0)
+    
+    -- Lógica para 90m
+    elseif _G.FlyMode90 then
+        local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
+        bv.Name = "FlyBV"
+        bv.MaxForce = Vector3.new(0, 100000, 0)
+        bv.Velocity = (root.Position.Y < 90) and Vector3.new(0, 30, 0) or Vector3.new(0, 0, 0)
         
-        -- Calculamos la altura dinámicamente según lo que elegiste en el Slider
-        -- Mantener la altura respecto a la gravedad para que sea fluido
-        bv.Velocity = Vector3.new(0, 0, 0)
-        
-        -- Esta parte mantiene la altura elegida sin teletransportar
-        local currentY = root.Position.Y
-        local targetY = _G.FlyHeight -- La altura que elijas en el Slider
-        
-        -- Si estás muy lejos de la altura objetivo, aplicamos un empuje suave
-        if math.abs(currentY - targetY) > 0.5 then
-            root.CFrame = root.CFrame:Lerp(CFrame.new(root.Position.X, targetY, root.Position.Z), 0.1)
+    -- Limpieza total si ambos están apagados
+    else
+        if root:FindFirstChild("FlyBV") then
+            root.FlyBV:Destroy()
         end
-        
-    elseif root and root:FindFirstChild("FlyBV") then
-        root.FlyBV:Destroy()
     end
 end)
 
-Rayfield:LoadConfiguration()
