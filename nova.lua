@@ -26,25 +26,20 @@ MovementTab:CreateToggle({
    end,
 })
 
--- 2. Anular Daño (Desactiva la capacidad de matar de las piezas)
+-- 2. Anti-Muerte (Ignorar eventos de daño)
 MovementTab:CreateToggle({
-   Name = "Anular Daño (Universal)",
+   Name = "Anti-Muerte (Bloqueo de Eventos)",
    CurrentValue = false,
    Callback = function(Value)
-      _G.AntiKill = Value
-      while _G.AntiKill do
-         for _, v in pairs(workspace:GetDescendants()) do
-            -- En lugar de destruir, simplemente apagamos el sensor de daño
-            if v:IsA("BasePart") and v:FindFirstChild("TouchInterest") then
-               local char = LocalPlayer.Character
-               if char and char:FindFirstChild("HumanoidRootPart") then
-                  if (v.Position - char.HumanoidRootPart.Position).Magnitude < 40 then
-                     v.CanTouch = false -- Esto hace que la pieza sea inofensiva
-                  end
-               end
-            end
+      _G.AntiDeath = Value
+      local char = LocalPlayer.Character
+      if char and char:FindFirstChild("Humanoid") then
+         -- Desconectamos los eventos que causan que el Humanoid muera
+         if _G.AntiDeath then
+            char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+         else
+            char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
          end
-         task.wait(0.2)
       end
    end,
 })
