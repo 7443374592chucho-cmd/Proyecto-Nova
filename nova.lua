@@ -29,15 +29,16 @@ MovementTab:CreateToggle({
    end,
 })
 
--- Slider de Velocidad (WalkSpeed)
-MovementTab:CreateSlider({
-   Name = "Velocidad",
-   Range = {16, 300},
-   Increment = 5,
-   Suffix = "spd",
-   CurrentValue = 16,
+-- Solo este Toggle debe estar en tu script
+MovementTab:CreateToggle({
+   Name = "Activar Velocidad 300",
+   CurrentValue = false,
    Callback = function(Value)
-      _G.WalkSpeedValue = Value
+      _G.SpeedEnabled = Value
+      local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+      if hum then
+         hum.WalkSpeed = Value and 300 or 16
+      end
    end,
 })
 
@@ -72,3 +73,21 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Esta es la ÚNICA lógica de velocidad que debe existir en tu script
+RunService.Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+
+    -- Si el interruptor (_G.SpeedEnabled) está activado, fuerza 300. Si no, fuerza 16.
+    local targetSpeed = (_G.SpeedEnabled == true) and 300 or 16
+    
+    if hum.WalkSpeed ~= targetSpeed then
+        hum.WalkSpeed = targetSpeed
+    end
+end)
