@@ -42,6 +42,15 @@ MovementTab:CreateToggle({
    end,
 })
 
+-- Toggle para activar/desactivar el modo sin daño
+MovementTab:CreateToggle({
+   Name = "Modo Sin Daño (No Damage)",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AntiDamage = Value
+   end,
+})
+
 local RunService = game:GetService("RunService")
 local LocalPlayer = game.Players.LocalPlayer
 
@@ -91,3 +100,16 @@ RunService.Heartbeat:Connect(function()
         hum.WalkSpeed = targetSpeed
     end
 end)
+
+-- Bucle constante que limpia los TouchInterest
+game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.AntiDamage then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            -- Solo busca los objetos que detectan el toque para hacer daño
+            if obj.Name == "TouchInterest" and obj:IsA("TouchTransmitter") then
+                obj:Destroy() -- Elimina el detector de contacto
+            end
+        end
+    end
+end)
+
