@@ -1,5 +1,6 @@
 -- Crear el menú
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.ResetOnSpawn = false -- ESTA ES LA LÍNEA QUE LO ARREGLA
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 200, 0, 100)
 MainFrame.Position = UDim2.new(0.3, 0, 0.4, 0)
@@ -12,21 +13,19 @@ local flySpeed = 50
 local bv = nil
 local bg = nil 
 
--- Botón Fly (Declarado antes para poder actualizarlo desde el bucle)
+-- Botón Fly
 local FlyBtn = Instance.new("TextButton", MainFrame)
 FlyBtn.Size = UDim2.new(0, 60, 0, 40)
 FlyBtn.Position = UDim2.new(0.65, 0, 0.1, 0)
 FlyBtn.Text = "Fly"
 FlyBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
 
--- Lógica de Vuelo
 game:GetService("RunService").RenderStepped:Connect(function()
     local player = game.Players.LocalPlayer
     local char = player.Character
     local hum = char and char:FindFirstChild("Humanoid")
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     
-    -- ARREGLO: Si muere, apagamos el vuelo y reseteamos el botón
     if hum and hum.Health <= 0 then
         if flying then
             flying = false
@@ -65,7 +64,6 @@ end)
 FlyBtn.MouseButton1Click:Connect(function()
     flying = not flying
     FlyBtn.Text = flying and "Fly ON" or "Fly"
-    
     if not flying then
         local char = game.Players.LocalPlayer.Character
         local hum = char and char:FindFirstChild("Humanoid")
@@ -108,14 +106,12 @@ MinusBtn.MouseButton1Click:Connect(function()
     SpeedLabel.Text = tostring(flySpeed)
 end)
 
--- ... (Todo tu código de Vuelo y el MainFrame que creaste al principio) ...
+-- Botón Anti Damage
+_G.AntiDamage = false
 
--- NO crees otro ScreenGui. Usa el MainFrame que ya tenías.
-
--- Botón Anti Damage (Posición separada: Y = 0.5)
 local AntiBtn = Instance.new("TextButton", MainFrame)
 AntiBtn.Size = UDim2.new(0, 180, 0, 30)
-AntiBtn.Position = UDim2.new(0.05, 0, 0.5, 0) -- El 0.5 es lo que lo separa
+AntiBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
 AntiBtn.Text = "Anti Damage: OFF"
 AntiBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 
@@ -123,15 +119,16 @@ AntiBtn.MouseButton1Click:Connect(function()
     _G.AntiDamage = not _G.AntiDamage
     AntiBtn.Text = _G.AntiDamage and "Anti Damage: ON" or "Anti Damage: OFF"
     AntiBtn.BackgroundColor3 = _G.AntiDamage and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
-end)
-
--- El bucle Heartbeat lo puedes dejar al final, no crea menú, solo ejecuta la lógica.
-game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.AntiDamage then
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("TouchTransmitter") then
-                obj:Destroy()
+    
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        -- Aplicamos el cambio con un pequeño retardo para evitar el error 267
+        task.spawn(function()
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanTouch = not _G.AntiDamage
+                end
             end
-        end
+        end)
     end
 end)
