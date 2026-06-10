@@ -130,3 +130,14 @@ AntiBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
+-- Arreglo para mantener el estado del Anti Damage al respawnear
+player.CharacterAdded:Connect(function(newChar)
+    if _G.AntiDamage then
+        task.wait(0.5) -- Espera breve para asegurar que el personaje cargue bien
+        for _, part in pairs(newChar:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanTouch = false
+            end
+        end
+    end
+end)
