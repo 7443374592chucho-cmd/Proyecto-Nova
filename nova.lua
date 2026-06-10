@@ -4,6 +4,33 @@ local playerGui = player:WaitForChild("PlayerGui")
 local ScreenGui = Instance.new("ScreenGui", playerGui)
 ScreenGui.ResetOnSpawn = false -- El menú no desaparecerá al morir
 
+-- Advertencia y nota de uso
+local WarningFrame = Instance.new("Frame", ScreenGui)
+WarningFrame.Size = UDim2.new(0, 300, 0, 180) -- Un poco más alto
+WarningFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
+WarningFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+WarningFrame.BorderSizePixel = 2
+WarningFrame.BorderColor3 = Color3.fromRGB(255, 200, 0)
+WarningFrame.ZIndex = 10
+
+local WarningText = Instance.new("TextLabel", WarningFrame)
+WarningText.Size = UDim2.new(0.9, 0, 0.6, 0)
+WarningText.Position = UDim2.new(0.05, 0, 0.05, 0)
+WarningText.Text = "ADVERTENCIA:\n1. Usa con moderación para evitar bans o expulsiones del juego sobre todo el uso del flyn usalo solo para pasar las atapas no para (volar alto).\n2. El 'Anti Daño' solo es efectivo contra algunas fuentes de daño específicas, no todas. Para agarrar las win o trofeos solo desactiva el anti daño ."
+WarningText.TextColor3 = Color3.fromRGB(255, 255, 255)
+WarningText.TextSize = 14
+WarningText.TextScaled = true -- ESTO HACE QUE EL TEXTO SEA VISIBLE
+WarningText.BackgroundTransparency = 1
+WarningText.TextWrapped = true
+WarningText.ZIndex = 11
+
+local CloseBtn = Instance.new("TextButton", WarningFrame)
+CloseBtn.Size = UDim2.new(0, 100, 0, 30)
+CloseBtn.Position = UDim2.new(0.5, -50, 0.75, 0)
+CloseBtn.Text = "Entendido"
+CloseBtn.ZIndex = 12
+CloseBtn.MouseButton1Click:Connect(function() WarningFrame:Destroy() end)
+
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 200, 0, 100)
 MainFrame.Position = UDim2.new(0.3, 0, 0.4, 0)
@@ -85,7 +112,7 @@ _G.AntiDamage = false
 local AntiBtn = Instance.new("TextButton", MainFrame)
 AntiBtn.Size = UDim2.new(0, 180, 0, 30)
 AntiBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
-AntiBtn.Text = "Anti Damage: OFF"
+AntiBtn.Text = "Anti Daño: OFF"
 AntiBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 
 AntiBtn.MouseButton1Click:Connect(function()
