@@ -67,3 +67,9 @@ TSB:CreateButton({Name = "BaldyToSorcerer", Callback = function() getgenv().morp
 TSB:CreateButton({Name = "Phantasm TSB", Callback = function() safeLoad("https://raw.githubusercontent.com/ATrainz/Phantasm/refs/heads/main/Games/TSB.lua") end})
 TSB:CreateButton({Name = "Speed Hub X", Callback = function() safeLoad("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/SpeedHubX.lua") end})
 TSB:CreateButton({Name = "Arc Script", Callback = function() safeLoad("https://raw.githubusercontent.com/Mikasuru/Arc/refs/heads/main/Arc.lua") end})
+
+local MM2 = Window:CreateTab("MM2", nil)
+MM2:CreateButton({Name ="HoneyLua Hub", Callback = function() safeLoad("https://raw.githubusercontent.com/ThatSick/HoneyLua/refs/heads/main/Loader.luau") end})
+MM2:CreateButton({Name ="FoxName Hub", Callback = function () safeLoad("https://raw.githubusercontent.com/xv3gasx/Murder-Mystery-2/refs/heads/main/Release.lua") end})
+MM2:CreateButton({Name = "Vertex", Callback = function () safeLoad('https://raw.smokingscripts.org/vertex.lua')end})
+MM2:CreateButton({Name = "VexonHub", Callbsck = function () safeload("https://raw.githubusercontent.com/DiosDi/VexonHub/refs/heads/main/VexonHub") end})
